@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken"); //jwt for user stay logged in
 const { OAuth2Client } = require("google-auth-library");
 const jwtHandling = require("../services/jwt");
 const bcrypt = require("bcrypt");
+const commentdao = require("../dao/comment.dao");
 
 const client = new OAuth2Client(
   "1072432309097-3npmrqi8dk2fm3eho7q54h9tn3ulfnku.apps.googleusercontent.com"
@@ -103,39 +104,51 @@ class UserController {
   }
   //la fonction asynchrone signin
   //la fonction asynchrone signin
-  async signin (req,res){
+  async signin(req, res) {
     try {
-      const {email,password} = req.body;
-      const userexists =   await userDao.findUserByEmail(email) 
-          if (userexists.success===false){
-              return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json('error during Sing in')
-
-          }
-           if (userexists.data== null) {
-              return res.status(StatusCodes.BAD_REQUEST).json('verifier votre email')
-          }
-          const decryptedPaswword = await passwordService.decryption(userexists.data.password,password)
-             if (decryptedPaswword.success===false){
-              return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json('error during Sing in')
-
-
-             }
-             if (!decryptedPaswword.data ){
-              return res.status(StatusCodes.FORBIDDEN).json('mot de passe incorrect')
-             }
-             const jwtProcess = await jwtHandling.jwtSign(userexists.data.email,userexists.data._id,userexists.data.roleId)
-             if(jwtProcess.success===false) {
-              return  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json("error during the sign in, please try again later")
-            }
-        //  return res.status(StatusCodes.OK).json(`Welcome ${userexists.data.firstName} ${userexists.data.lastName}`)
-         return res.json({token:jwtProcess.data ,
-             msg:`Welcome ${userexists.data.firstName} ${userexists.data.lastName}`,
-             role : userexists.data.roleId,
-         })
+      const { email, password } = req.body;
+      const userexists = await userDao.findUserByEmail(email);
+      if (userexists.success === false) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json("error during Sing in");
+      }
+      if (userexists.data == null) {
+        return res.status(StatusCodes.BAD_REQUEST).json("verifier votre email");
+      }
+      const decryptedPaswword = await passwordService.decryption(
+        userexists.data.password,
+        password
+      );
+      if (decryptedPaswword.success === false) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json("error during Sing in");
+      }
+      if (!decryptedPaswword.data) {
+        return res.status(StatusCodes.FORBIDDEN).json("mot de passe incorrect");
+      }
+      const jwtProcess = await jwtHandling.jwtSign(
+        userexists.data.email,
+        userexists.data._id,
+        userexists.data.roleId
+      );
+      if (jwtProcess.success === false) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json("error during the sign in, please try again later");
+      }
+      //  return res.status(StatusCodes.OK).json(`Welcome ${userexists.data.firstName} ${userexists.data.lastName}`)
+      return res.json({
+        token: jwtProcess.data,
+        msg: `Welcome ${userexists.data.firstName} ${userexists.data.lastName}`,
+        role: userexists.data.roleId,
+      });
     } catch (error) {
-        console.log(error)
-        return  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json("error during the sign in, please try again later")
-        
+      console.log(error);
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json("error during the sign in, please try again later");
     }
   }
   //affichage de uploaded files (json format)
