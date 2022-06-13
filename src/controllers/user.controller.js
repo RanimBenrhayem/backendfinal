@@ -14,7 +14,7 @@ const bcrypt = require("bcrypt");
 const commentdao = require("../dao/comment.dao");
 
 const client = new OAuth2Client(
-  "1072432309097-3npmrqi8dk2fm3eho7q54h9tn3ulfnku.apps.googleusercontent.com"
+  "678764918390-8qs192e1q8hns30bhqpem0cmvadefvhi.apps.googleusercontent.com"
 );
 
 class UserController {
@@ -346,7 +346,7 @@ class UserController {
       .verifyIdToken({
         idToken: tokenId,
         audience:
-          "1072432309097-3npmrqi8dk2fm3eho7q54h9tn3ulfnku.apps.googleusercontent.com",
+          "678764918390-8qs192e1q8hns30bhqpem0cmvadefvhi.apps.googleusercontent.com",
       })
       .then((response) => {
         const { email_verified, name, email } = response.payload;

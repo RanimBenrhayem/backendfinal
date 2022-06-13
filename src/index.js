@@ -7,6 +7,7 @@ require("dotenv").config()
 const uploadRouter = require("./routers/upload.router")
 const commentsRouter = require("./routers/comments.router");
 const chartRouter = require("./routers/chart.router")
+const password = require("./routers/passwordf.router")
 
 const app = express(); //instance d'express nommé app
 
@@ -16,7 +17,7 @@ app.use("/user", userRouter);
 app.use("/uploads" , uploadRouter)
 app.use('/admin',adminRouter)
 app.use("/comments", commentsRouter);
-
+app.use("/password" , password)
 app.use("/chart" , chartRouter)
 
 const mongoURI = process.env.database_uri;

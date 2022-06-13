@@ -59,6 +59,7 @@ class PasswordController {
     const newPassword = req.body.password;
     const sentToken = req.body.token;
     //console.log(sentToken);
+    
     userModel
       .findOne({ resetToken: sentToken, expireToken: { $gt: Date.now() } })
       .then((user) => {
