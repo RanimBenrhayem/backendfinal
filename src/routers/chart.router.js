@@ -10,7 +10,7 @@ router.post('/save/database',[jwtHandling.jwtVerify , userGuard], chartControlle
 router.get("/all" , [jwtHandling.jwtVerify , userGuard] , chartController.getAllSavedDashboard)
 router.get("/joined/all" , [jwtHandling.jwtVerify , userGuard] , chartController.getAllSavedJoinedDashboards)
 router.get("/one/:id" , chartController.getOneSavedDashboard)
-router.delete("/delete/:id" , chartController.deleteSavedChart)
+router.delete("/delete/:id" ,[jwtHandling.jwtVerify , userGuard], chartController.deleteSavedChart)
 router.post("/joined/draw/:id" , chartController.drawChartForJoinedFiles)
 router.get("/joined/one/:id" , chartController.getOneSavedJoinedDashboard)
 router.post("/alert/simple/add/:id" , [jwtHandling.jwtVerify , userGuard] , chartController.addAlertForSimpleFile)

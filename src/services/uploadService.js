@@ -4,42 +4,34 @@ const multer = require("multer");
 const { GridFsStorage } = require("multer-gridfs-storage");
 
 // Storage
-const storage = new GridFsStorage({
+const storage = new GridFsStorage({  //construction d'un objet
   url: process.env.database_uri,
 
   file: (req, file) => {
     return new Promise((resolve, reject) => {
-      crypto.randomBytes(16, (err, buf) => {
+      crypto.randomBytes(16, (err, buf) => {  //construction du nom unique du fichier
         if (err) {
           return reject(err);
         }
-        const filename = buf.toString("hex") + path.extname(file.originalname);
-        //const bucketName = req.body.bucketName ;
-        // console.log("id*****************",req.body.idFile1)
-        const userId = req.infos.authId;
+        const filename = buf.toString("hex") + path.extname(file.originalname); //+extension file .csv
 
-        //req.info = { fileName: filename, originaleFileName: file.originalname };
+        const userId = req.infos.authId;
 
         const fileInfo = {
           filename: filename,
-          metadata: {
+          metadata: { // metadata proprièté de gfs 
             originalFileName: file.originalname,
             userId,
           },
-          bucketName: "uploads",
+          bucketName: "uploads",  //nom de la table
         };
-        // const fileInfo = {
-        //   filename: filename,
-        //    metadata,
-        //   bucketName : "uploads",
-        // };
         resolve(fileInfo);
       });
     });
   },
 });
 
-const upload = multer({
+const upload = multer({ //celui qui fait upload
   storage,
 });
 

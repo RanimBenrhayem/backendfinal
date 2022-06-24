@@ -16,7 +16,7 @@ router.post(
   uploadController.uploadProcess
 ); //upload files
 router.post(
-  "/join/add/:userId",
+  "/join/add/",
   [jwtHandling.jwtVerify, userGuard, uploadjoin.single("file")],
   uploadController.uploadProcess
 );
@@ -26,7 +26,7 @@ router.get(
   uploadController.getFileByFileName
 ); //file table
 router.delete(
-  "/files/delete/:id/:userId?",
+  "/files/delete/:id/",
   [jwtHandling.jwtVerify, userGuard],
   uploadController.deleteFileFromDB
 ); //delete
@@ -46,7 +46,7 @@ router.get(
   joinedFilesController.getJoinedFilesById
 );
 router.get(
-  "/files/getall/:userId?",
+  "/files/getall/",
   [jwtHandling.jwtVerify, userGuard],
   uploadController.getUserSingleFiles
 );

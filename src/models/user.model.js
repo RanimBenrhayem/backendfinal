@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-//le modele "user" de la base Mango
+//le modele "user" de la base Mongo
 const schema = new mongoose.Schema({
   email: { type: String, unique: true },
   password: String,
@@ -9,6 +9,7 @@ const schema = new mongoose.Schema({
   roleId: { type: mongoose.Schema.Types.ObjectId, ref: "roles" },
   resetToken: String,
   expireToken: Date,
+
 });
 const Model = mongoose.model("user", schema); //nom du model : user
 

@@ -17,5 +17,24 @@ class comDao {
       };
     }
   }
+
+  async findByUserId (userId) {
+    try{
+      const comments = await  commentsModel.find({userId:userId},{_id:1}).exec() //retour que id user (nommé projection)
+      return {success:true,data:comments}
+    }catch (e) {
+      console.log(e)
+      return {success:false,data:null}
+    }
+  }
+  async deleteAllCommentsOfAUser(commentIds) { 
+    try{
+      const comments = await commentsModel.deleteMany({_id : {$in:commentIds}}).exec()
+      return {success:true}
+    }catch (e) {
+      console.log(e)
+      return {success:false}
+    }
+  }
 }
 module.exports = new comDao();

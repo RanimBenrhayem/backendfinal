@@ -80,7 +80,7 @@ class adminContoller {
         roleId: role.data._id,
       });
       await user.save();
-      const mail = sendMail(email);
+       sendMail(email);
 
       return res
         .status(StatusCodes.CREATED)

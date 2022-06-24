@@ -16,17 +16,6 @@ class JoinedFilesContollers {
       let file1;
       let file2;
       const userId = req.infos.authId;
-      //         const file1exists = await fileDao.findFileByFileName(gfs,fileName1)
-      //         return res.json(file1exists)
-
-      //         if (file1exists.success===false){
-      //             return res.status(StatusCodes.NOT_FOUND).json(` File with this name : ${fileName1} not found`)
-      //         }
-
-      //   const file2exists = await fileDao.findFileByFileName(gfs,fileName2)
-      //   if (file2exists.success===false){
-      //     return res.status(StatusCodes.NOT_FOUND).json(` File with this name : ${fileName2} not found`)
-      // }
 
       const file = gfs
         .find({
@@ -39,15 +28,15 @@ class JoinedFilesContollers {
               .status(StatusCodes.NOT_FOUND)
               .json(` File with this name : ${fileName1} not found`);
           }
-          file1 = files[0].metadata.originalFileName;
+          file1 = files[0].metadata.originalFileName; 
 
           gfs
             .openDownloadStream(mongoose.Types.ObjectId(fileName1))
-            .on("data", (chunk) => {
-              bufs.push(chunk);
+            .on("data", (chunk) => { //on data : le fichier arrive dans des parties
+              bufs.push(chunk);      //mettre le fichier dans le tableau bufs
             })
-            .on("end", () => {
-              const fbuf = Buffer.concat(bufs);
+            .on("end", () => {   // une fois terminée
+              const fbuf = Buffer.concat(bufs); 
               result = fbuf.toString();
               bufs = [];
               const find = gfs
@@ -69,55 +58,37 @@ class JoinedFilesContollers {
                     .on("end", async () => {
                       const fbuf2 = Buffer.concat(bufs);
                       result2 = fbuf2.toString();
-                      // return res.json({result,result2})
+                     
                       const joinedFile = await join(
                         result,
                         result2,
                         attribut1,
                         attribut2
                       );
-                      // return res.attachment(path.join(__dirname)).sendFile(path.join(__dirname))
                       if (joinedFile.success === false) {
                         return res
                           .status(StatusCodes.INTERNAL_SERVER_ERROR)
                           .json("join failed !");
                       }
-                      console.log(joinedFile.data);
+                      
                       const deleteColumn = joinedFile.data.joinedResult.map(
                         (element) => {
                           const { [attribut1]: toDelete, ...others } = element;
-                          console.log("aaaaaaaaaaa");
-                          console.log(attribut1.length);
-                          console.log(toDelete);
-                          console.log(others);
-                          console.log("aaaaaaaaaaaaaaa");
                           return others;
                         }
                       );
-                      console.log(deleteColumn);
+                     
                       return res
-                        .attachment(joinedFile.data.joinedFileName)
+                        .attachment(joinedFile.data.joinedFileName) //return file
                         .json({
                           joinedResult: deleteColumn,
                           originalFileName: `${file1}_${file2}_with_${attribut1}_${attribut2}.csv`,
                         });
-                      return res.sendFile(
-                        path.join(
-                          __dirname,
-                          "..",
-                          "..",
-                          joinedFile.data.joinedFileName
-                        )
-                      );
+                   
                     });
                 });
             });
         });
-      // const joinedProcess = await join(fileName1,fileName2,attribut1,attribut2)
-      //  if (joinedProcess.success===false){
-      //      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json('can not join files')
-      //  }
-      //  return res.status(StatusCodes.CREATED).json(joinedProcess.data)
     } catch (error) {
       console.log(error);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(error);
@@ -147,19 +118,12 @@ class JoinedFilesContollers {
 
   async deleteJoinedFileFromDB(req, res) {
     const gfsjoin = req.app.locals.gfsJoin;
-    // const  userId  = req.params.userId;
-    //console.log(userId)
-    //const result = await userDao.deleteAndUpdate(idUser, req.params.id);
-    // if (result.success === false) {
-    //   return res.status(StatusCodes.BAD_REQUEST).json(result.msg);
-    // }
     if (req.infos.role == "admin") {
       const file = gfsjoin
         .find({
           _id: mongoose.Types.ObjectId(req.params.id),
         })
         .toArray((err, files) => {
-          // console.log("aaaaaaaaaaaa")
           if (!files || files.length === 0) {
             return res.status(404).json({
               err: "No files exist",
@@ -181,7 +145,6 @@ class JoinedFilesContollers {
           "metadata.userId": req.infos.authId,
         })
         .toArray((err, files) => {
-          // console.log("aaaaaaaaaaaa")
           if (!files || files.length === 0) {
             return res.status(404).json({
               err: "No files exist",

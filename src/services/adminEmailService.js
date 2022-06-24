@@ -9,9 +9,6 @@ function adminEmailServices(req, res) {
       pass: "ranim123",
     },
   });
-
-  console.log(req.body);
-
   const email = req.body.email;
   const message = req.body.message;
   const content = ` ${message} `;

@@ -15,6 +15,6 @@ const schema = new mongoose.Schema({
 
     
 })
-const Model = mongoose.model('dashboard', schema); //nom du model : joinfiles
+const Model = mongoose.model('chart', schema); 
 
 module.exports =Model

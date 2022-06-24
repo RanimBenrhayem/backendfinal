@@ -14,14 +14,14 @@ const bcrypt = require("bcrypt");
 const commentdao = require("../dao/comment.dao");
 
 const client = new OAuth2Client(
-  "678764918390-8qs192e1q8hns30bhqpem0cmvadefvhi.apps.googleusercontent.com"
+  "1080158334920-r61g9qlgbdent0sahg9uq9umjgfh18di.apps.googleusercontent.com"
 );
 
 class UserController {
   //fonction asynchrone signup
   async signup(req, res) {
     try {
-      const { firstName, lastName, phoneNumber, email, password } = req.body; //retreiving attributes from request's body
+      const { firstName, lastName, phoneNumber, email, password} = req.body; //retreiving attributes from request's body
       const validationResult = await validate({
         firstName,
         lastName,
@@ -88,6 +88,7 @@ class UserController {
         email,
         password: passwordProcess.data,
         roleId: role.data._id,
+        
       });
       await user.save();
       const mail = sendMail(email);
@@ -102,7 +103,7 @@ class UserController {
         .json("Error during account creation, please try again later");
     }
   }
-  //la fonction asynchrone signin
+  
   //la fonction asynchrone signin
   async signin(req, res) {
     try {
@@ -128,6 +129,7 @@ class UserController {
       if (!decryptedPaswword.data) {
         return res.status(StatusCodes.FORBIDDEN).json("mot de passe incorrect");
       }
+      //gerenate token
       const jwtProcess = await jwtHandling.jwtSign(
         userexists.data.email,
         userexists.data._id,
@@ -138,11 +140,22 @@ class UserController {
           .status(StatusCodes.INTERNAL_SERVER_ERROR)
           .json("error during the sign in, please try again later");
       }
-      //  return res.status(StatusCodes.OK).json(`Welcome ${userexists.data.firstName} ${userexists.data.lastName}`)
+
+      const roleName = await roleDao.findOneRoleById(userexists.data.roleId);//pour rediriger vers la bonne page d'acceuil
+      if (roleName.success === false) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json("error during the sign in, please try again later");
+      }
+      if (!roleName.data) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json("error during the sign in, please try again later");
+      }
       return res.json({
         token: jwtProcess.data,
         msg: `Welcome ${userexists.data.firstName} ${userexists.data.lastName}`,
-        role: userexists.data.roleId,
+        role: roleName.data.name, //pour rediriger vers la bonne page d'acceuil
       });
     } catch (error) {
       console.log(error);
@@ -193,29 +206,51 @@ class UserController {
       if (error) {
         return next(error);
       } else {
-        res.status(200).json({
-          msg: data,
-        });
+       return  res.status(200).json("User Deleted Successfully !");
       }
     });
   }
-  async deleteprofile(req, res, next) {
-    const userId = req.infos.role == "admin" ? req.params.id : req.infos.authId;
-    //const userId = req.params.id;
-    const commentId = await commentDao.findComById(req.params.id);
-
-    userModel.findByIdAndRemove(userId, (error, data) => {
-      if (error) {
-        return error;
-      } else {
-        res.status(200).json({
-          msg: data,
-        });
-        commentsModel.findOneAndDelete(commentId).exec();
+  async deleteprofile(req, res) {
+    const userId = req.infos.authId; 
+    const role = req.infos.authRole;
+    try {
+      const user = await userModel.findByIdAndDelete(userId);
+      const roleName = await roleDao.findOneRoleById(role);
+      if (roleName.success === false) {
+        return res
+          .status(StatusCodes.INTERNAL_SERVER_ERROR)
+          .json("user removed, error while deleting comments");
       }
-    });
+      if (roleName.data.name === "admin") {
+        const comments = await commentdao.findByUserId(userId);
+        if (comments.success === false) {
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json("error while deleting comments");
+        }
+        if (comments.data) {
+          const result = await commentdao.deleteAllCommentsOfAUser(
+            comments.data //id user qui a écrit les commentaires
+          );
+          if (result.success === false) {
+            return res
+              .status(StatusCodes.INTERNAL_SERVER_ERROR)
+              .json("error while deleting user comments");
+          }
+          return res
+            .status(StatusCodes.OK)
+            .json("user removed with his comments");
+        }
+        return res.status(StatusCodes.OK).json("user removed"); //message for user who dont have comments (else)
+      }
+    } catch (e) {
+      console.log(e);
+      return res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json("error while deleting profile");
+    }
   }
-  async updateuser(req, res, next) {
+  async updateuser(req, res) {
     const { firstName, lastName, phoneNumber, email } = req.body; //retreiving attributes from request's body
     const userId = req.infos.role == "admin" ? req.params.id : req.infos.authId;
     const validationResultWithoutPassword = await validateWitoutPassword({
@@ -244,7 +279,7 @@ class UserController {
           }
           return res.status(StatusCodes.BAD_REQUEST).json("Please try again");
         } else {
-          return res.status(StatusCodes.OK).json(data);
+          return res.status(StatusCodes.OK).json(" Account Has Been Updated Successfully");
         }
       }
     );
@@ -292,7 +327,7 @@ class UserController {
     const userId = req.infos.authId;
     const { password } = req.body;
     const usersById = await userDao.findUserById(userId);
-    const decryptedPaswword = await passwordService.decryption(
+    const decryptedPaswword = await passwordService.decryption( //comparaison 
       usersById.data.password,
       password
     );
@@ -311,8 +346,6 @@ class UserController {
     if (!usersById.data) {
       return res.status(StatusCodes.NOT_FOUND).json("User not found");
     }
-
-    //return res.status(StatusCodes.OK).json("correct password");
   }
   async setNewPassword(req, res, next) {
     try {
@@ -325,7 +358,7 @@ class UserController {
         { password: password },
         { new: true }
       );
-      return res.status(200).json({ status: true, data: userPassword });
+      return res.status(200).json({ status: true, data:"Password Updated Successfully" });
     } catch (error) {
       return res.status(400).json({ status: false, error: "erreur" });
     }
@@ -346,7 +379,7 @@ class UserController {
       .verifyIdToken({
         idToken: tokenId,
         audience:
-          "678764918390-8qs192e1q8hns30bhqpem0cmvadefvhi.apps.googleusercontent.com",
+          "1080158334920-r61g9qlgbdent0sahg9uq9umjgfh18di.apps.googleusercontent.com",
       })
       .then((response) => {
         const { email_verified, name, email } = response.payload;

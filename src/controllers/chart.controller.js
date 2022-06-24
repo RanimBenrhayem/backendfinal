@@ -10,27 +10,7 @@ class ChartController {
         let bufs = []
         let result;
         const gfs = req.app.locals.gfs;
-        if(req.infos.role == "admin") {
-            const file = gfs
-                .find({
-                    _id: mongoose.Types.ObjectId(req.params.id)
-                })
-                .toArray((err, files) => {
-                    if (!files || files.length === 0) {
-                        return res.status(404).json({
-                            err: "no files exist",
-                        });
-                    }
-
-                    gfs.openDownloadStream(mongoose.Types.ObjectId(req.params.id))
-                        .on("data" , (chunk) => bufs.push(chunk)).on("end" , ()=>{
-                        const fbuf = Buffer.concat(bufs);
-                        result = fbuf.toString();
-                        const parsed = Papa.parse(result) ;
-                        return res.json(parsed);
-                    })
-                });
-        }else {
+        
             const file = gfs
                 .find({
                     _id: mongoose.Types.ObjectId(req.params.id),
@@ -47,21 +27,21 @@ class ChartController {
                 });
             gfs.openDownloadStream(mongoose.Types.ObjectId(req.params.id))
                 .on("data" , (chunk) => bufs.push(chunk)).on("end" , ()=> {
-                const fbuf = Buffer.concat(bufs);
+                const fbuf = Buffer.concat(bufs); 
                 result = fbuf.toString();
-                const parsed = Papa.parse(result);
+                const parsed = Papa.parse(result); //convert result to object
                 if(parsed.errors.length>0) {
-                    return  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({error : parsed.errors})
+                    return  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({error : parsed.errors}) //error lors du parse
                 }
-                const data = parsed.data ;
-                const x = data[0].indexOf(xaxis.replace(/(\r\n|\n|\r)/gm, ""));
+                const data = parsed.data ; //object
+                const x = data[0].indexOf(xaxis.replace(/(\r\n|\n|\r)/gm, "")); //nettoyage 
                 const y = data[0].indexOf(yaxis.replace(/(\r\n|\n|\r)/gm, ""));
-                const dataMap = new Map();
+                const dataMap = new Map(); 
                     data.slice(1,-1).map((element) => {
-                        const elt = element[y].replace(/(\r\n|\n|\r)/gm, "")
-                        if(dataMap.get(element[x])) {
+                        const elt = element[y].replace(/(\r\n|\n|\r)/gm, "") //nettoyage des données 
+                        if(dataMap.get(element[x])) { 
 
-                            dataMap.set(element[x] , dataMap.get(element[x])+ parseFloat(elt ))
+                            dataMap.set(element[x] , dataMap.get(element[x])+ parseFloat(elt )) //si somme
                         }
                         else {
                             dataMap.set(element[x] ,  parseFloat( elt))
@@ -82,17 +62,16 @@ class ChartController {
 
 
 
-    }
+   
 
     async saveDashboardIntoDataBase(req,res){
         try{   
              const {attribut1 , attribut2,fileId  ,typeOfDashboard , isJoined} = req.body
-        //const chart = await this.drawSimple(req,res)
         const userId = req.infos.authId;
         const dashboardModel = new DashboardModel({fileId,attribut1,attribut2 ,userId,typeOfDashboard,isJoined})
        const result= await dashboardModel.save()
        
-        return   res.status(StatusCodes.CREATED).json(result)
+        return   res.status(StatusCodes.CREATED).json({result,msg:"chart Saved , You can chek your dashboards List"})
         }
     
      catch (error) {
@@ -128,7 +107,8 @@ class ChartController {
                     }
                 }
             ])
-            return res.status(StatusCodes.OK).json(result)
+            const formattedResult = result.filter((elt)=>elt.file.length>0)
+            return res.status(StatusCodes.OK).json(formattedResult)
         }catch (e) {
             console.log(e)
             return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(e)
@@ -159,7 +139,9 @@ class ChartController {
                 }
                 }
             ])
-            return res.status(StatusCodes.OK).json(result)
+            const formattedResult = result.filter((elt)=>elt.file.length>0)
+
+            return res.status(StatusCodes.OK).json(formattedResult)
         }catch (e) {
             console.log(e)
             return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(e)
@@ -171,7 +153,7 @@ class ChartController {
             const gfs = req.app.locals.gfs;
             let bufs = []
             let result;
-            const savedDashboard = await DashboardModel.findOne({_id:id})
+            const savedDashboard = await DashboardModel.findOne({_id:id}).populate('alertId')
            // return res.json(savedDashboard)
             //TODO : check null value
             const yaxis = savedDashboard.attribut2;
@@ -218,7 +200,7 @@ class ChartController {
                     labels.push(key)
                     returnedData.push(value)
                 })
-                return res.status(StatusCodes.OK).json({ data :{xaxis,yaxis ,   returnedData , labels},type:savedDashboard.typeOfDashboard});
+                return res.status(StatusCodes.OK).json({ data :{xaxis,yaxis ,   returnedData , labels},type:savedDashboard.typeOfDashboard,alert:savedDashboard.alertId});
             })
 
         }catch (e) {
@@ -230,7 +212,7 @@ class ChartController {
     async deleteSavedChart (req,res) {
         try{
             const id = req.params.id;
-            const isExists = await DashboardModel.findOne({_id:id})
+            const isExists = await DashboardModel.findOne({_id:id , "userId":req.infos.authId})
             if(!isExists) {
                 return res.json(StatusCodes.NOT_FOUND).json("no chart found")
             }

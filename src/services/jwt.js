@@ -2,10 +2,12 @@ const jwt = require("jsonwebtoken");
 const { StatusCodes } = require("http-status-codes");
 
 class JwtHandling {
-  async jwtSign(email, id, userType, expiresIn = "3d") {
+  async jwtSign(email, id, userType, expiresIn = "3d") { 
     try {
-      const result = await jwt.sign({ email, userType, id }, "branper", {
-        expiresIn,
+      //creation token
+      const result = await jwt.sign({ email, userType, id }, //PAYLOAD
+        process.env.JWT_SECRET  , { 
+        expiresIn,//option
       });
       return { success: true, data: result };
     } catch (e) {

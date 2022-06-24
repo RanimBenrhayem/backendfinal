@@ -17,7 +17,7 @@ router.delete(
   userController.deleteuser
 );
 router.delete(
-  "/deleteprofile/:id",
+  "/deleteprofile",
   [jwtHandling.jwtVerify, userGuard],
   userController.deleteprofile
 );
@@ -50,16 +50,4 @@ router.post(
   userController.setNewPassword
 );
 
-/*
-
-router.post("/signup", userController.signup);
-router.post("/signin", userController.signin);
-router.post("/googlesignin", userController.googlesignin);
-router.post("/deleteuser/:id", userController.deleteuser);
-router.get("/userslist", userController.userslist);
-router.post("/updateuser/:id", userController.updateuser);
-
- */
-
-//files uploaded (json format)
 module.exports = router;

@@ -19,10 +19,8 @@ class commentsController {
         createdAt: Date.now(),
       });
       await comment.save();
-      //console.log("added");
-      return res.status(StatusCodes.CREATED).json("added");
+      return res.status(StatusCodes.CREATED).json("Comment Added Successfully !");
     } catch (error) {
-      //console.log(error);
       return error;
     }
   }
@@ -47,33 +45,13 @@ class commentsController {
       const deleteResult = await commentsModel
         .findByIdAndRemove(req.params.id)
         .exec();
-      return res.status(StatusCodes.OK).json({ msg: deleteResult });
+      return res.status(StatusCodes.OK).json( "Comment Deleted Successfully !" );
     } catch (e) {
       console.log(e);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(e.toString());
     }
   }
-  async updatecomment(req, res, next) {
-    try {
-      const result = commentsModel.findByIdAndUpdate(
-        req.params.id,
-        {
-          $set: req.body,
-        },
-        (error, data) => {
-          if (error) {
-            return next(error);
-          } else {
-            res.json(data);
-            console.log("Comment updated successfully !");
-          }
-        }
-      );
-    } catch (e) {
-      console.log(e);
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json(e.toString());
-    }
-  }
+  
 
   async getCommentById(req, res, next) {
     try {
@@ -98,7 +76,7 @@ class commentsController {
     try {
       await commentsModel
         .find({ userId: req.infos.authId })
-        .populate("userId")
+        .populate("userId") //get the attributs of the user
 
         .then((comments) => {
           res.status(200).json(comments);

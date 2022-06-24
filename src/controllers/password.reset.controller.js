@@ -15,12 +15,11 @@ class PasswordController {
         pass: "ranim123",
       },
     });
-    crypto.randomBytes(32, (err, buffer) => {
+    crypto.randomBytes(32, (err, buffer) => {   //construction de token part1 unique
       if (err) {
         console.log(err);
       }
-      const token = buffer.toString("hex");
-      //res.json(token);
+      const token = buffer.toString("hex");  //hex pour avoir un token lisible
       userModel.findOne({ email: req.body.email }).then((user) => {
         if (!user) {
           return res
@@ -55,16 +54,19 @@ class PasswordController {
       });
     });
   }
-  async newpassword(req, res) {
+   newpassword(req, res) {
     const newPassword = req.body.password;
-    const sentToken = req.body.token;
-    //console.log(sentToken);
+    const sentToken = req.body.token; // token from url vient du front
+    if (newPassword && newPassword.length<5){
+      return res.status(400).json({ error: "short password..." });
+    }
     
     userModel
-      .findOne({ resetToken: sentToken, expireToken: { $gt: Date.now() } })
+      .findOne({ resetToken: sentToken, expireToken: { $gt: Date.now() } }) //gt : great than
       .then((user) => {
+        console.log(user)
         if (!user) {
-          return res.status(422).json({ error: "Try again session expired" });
+          return res.status(404).json({ error: "session expired or wrong credentials" });
         }
         bcrypt.hash(newPassword, 10).then((hashedpassword) => {
           user.password = hashedpassword;
@@ -77,6 +79,8 @@ class PasswordController {
       })
       .catch((err) => {
         console.log(err);
+        return res.status(422).json({ error: "can't not change password" });
+
       });
   }
 }
