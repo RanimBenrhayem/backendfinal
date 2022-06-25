@@ -264,7 +264,7 @@ class ChartController {
     async getOneSavedJoinedDashboard(req,res) {
 
         try{
-            console.log("*****************************************")
+            
             const id = req.params.id;
             const gfsJoin = req.app.locals.gfsJoin;
             let bufs = []

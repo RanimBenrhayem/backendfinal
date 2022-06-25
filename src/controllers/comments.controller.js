@@ -1,5 +1,5 @@
 const commentDao = require("../dao/comment.dao");
-const replyModel = require("../models/reply.model");
+
 const userDao = require("../dao/user.dao");
 const userModel = require("../models/user.model");
 const mongoose = require("mongoose");

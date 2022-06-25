@@ -192,23 +192,7 @@ class JoinedFilesContollers {
 
   downloadJoinedFileById(req, res) {
     const gfs = req.app.locals.gfsJoin;
-    if (req.infos.role == "admin") {
-      const file = gfs
-        .find({
-          _id: mongoose.Types.ObjectId(req.params.id),
-        })
-        .toArray((err, files) => {
-          if (!files || files.length === 0) {
-            return res.status(404).json({
-              err: "No files exist",
-            });
-          }
-
-          gfs
-            .openDownloadStream(mongoose.Types.ObjectId(req.params.id))
-            .pipe(res);
-        });
-    } else {
+   
       const file = gfs
         .find({
           _id: mongoose.Types.ObjectId(req.params.id),
@@ -227,6 +211,6 @@ class JoinedFilesContollers {
         });
     }
   }
-}
+
 
 module.exports = new JoinedFilesContollers();

@@ -230,7 +230,7 @@ class UserController {
         }
         if (comments.data) {
           const result = await commentdao.deleteAllCommentsOfAUser(
-            comments.data //id user qui a écrit les commentaires
+            comments.data //id commentaires ecritent par les users
           );
           if (result.success === false) {
             return res
@@ -241,8 +241,9 @@ class UserController {
             .status(StatusCodes.OK)
             .json("user removed with his comments");
         }
-        return res.status(StatusCodes.OK).json("user removed"); //message for user who dont have comments (else)
+       
       }
+      return res.status(StatusCodes.OK).json("user removed"); //message for user who dont have comments (else)
     } catch (e) {
       console.log(e);
       return res
