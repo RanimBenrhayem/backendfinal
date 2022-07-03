@@ -79,7 +79,7 @@ class JoinedFilesContollers {
                       );
                      
                       return res
-                        .attachment(joinedFile.data.joinedFileName) //return file
+                        .attachment(joinedFile.data.joinedFileName) //return filename
                         .json({
                           joinedResult: deleteColumn,
                           originalFileName: `${file1}_${file2}_with_${attribut1}_${attribut2}.csv`,
@@ -181,8 +181,7 @@ class JoinedFilesContollers {
   getUserJoinedFiles(req, res) {
     const gfs = req.app.locals.gfsJoin;
 
-    const userId =
-      req.infos.role == "admin" ? req.params.userId : req.infos.authId;
+    const userId = req.infos.authId;
     const file = gfs
       .find({
         "metadata.userId": userId,

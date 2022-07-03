@@ -2,8 +2,8 @@ const userModel = require("../models/user.model");
 const joi = require("joi");
 
 const schema = joi.object({
-  firstName: joi.string().min(3).required("Firstname is required").alphanum(),
-  lastName: joi.string().min(3).required("Lastname is required").alphanum(),
+  firstName: joi.string().min(3).required("Firstname is required").pattern(new RegExp("^[a-zA-Z ]*$")),
+  lastName: joi.string().min(3).required("Lastname is required").pattern(new RegExp("^[a-zA-Z ]*$")),
   password: joi.string().min(5).required("password is required").alphanum(),
   email: joi.string().email().required("email is required"),
   phoneNumber: joi

@@ -22,14 +22,14 @@ class JwtHandling {
         .status(StatusCodes.BAD_REQUEST)
         .json("undefined Bearer Authorization Header");
     }
-    const token = authHeader.split(" ")[1];
+    const token = authHeader.split(" ")[1]; //separation entre bearer et token
 
     if (token) {
-      console.log(token);
+      
       try {
-        const { email, id, userType } = await jwt.verify(token, "branper");
+        const { email, id, userType } = await jwt.verify(token, "branper"); //retreive email , id , usertype from token
         req.infos = { authEmail: email, authId: id, authRole: userType };
-        return next();
+        return next(); //requete complete son chemin
       } catch (err) {
         return res.status(StatusCodes.UNAUTHORIZED).send("invalid token");
       }

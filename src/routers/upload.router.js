@@ -61,7 +61,7 @@ router.get(
   uploadController.downloadFileById
 );
 router.get(
-  "/files/joined/getall/:userId?",
+  "/files/joined/getall/",
   [jwtHandling.jwtVerify, userGuard],
   joinedFilesController.getUserJoinedFiles
 );

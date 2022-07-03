@@ -9,9 +9,7 @@ const commentsschema = new mongoose.Schema(
     createdAt: Date,
   }
 
-  //Date,
-  //commentId: { type: mongoose.Schema.Types.ObjectId, ref: "comments" },
-  //number: Number,
+ 
 );
 
 const commentsModel = mongoose.model("comments", commentsschema);

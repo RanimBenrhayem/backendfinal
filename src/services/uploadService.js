@@ -25,7 +25,7 @@ const storage = new GridFsStorage({  //construction d'un objet
           },
           bucketName: "uploads",  //nom de la table
         };
-        resolve(fileInfo);
+        resolve(fileInfo); //to the front
       });
     });
   },

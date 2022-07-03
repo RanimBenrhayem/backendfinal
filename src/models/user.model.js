@@ -9,6 +9,7 @@ const schema = new mongoose.Schema({
   roleId: { type: mongoose.Schema.Types.ObjectId, ref: "roles" },
   resetToken: String,
   expireToken: Date,
+  ref : String,
 
 });
 const Model = mongoose.model("user", schema); //nom du model : user

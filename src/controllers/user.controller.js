@@ -21,7 +21,7 @@ class UserController {
   //fonction asynchrone signup
   async signup(req, res) {
     try {
-      const { firstName, lastName, phoneNumber, email, password} = req.body; //retreiving attributes from request's body
+      const { firstName, lastName, phoneNumber, email, password , ref} = req.body; //retreiving attributes from request's body
       const validationResult = await validate({
         firstName,
         lastName,
@@ -88,6 +88,7 @@ class UserController {
         email,
         password: passwordProcess.data,
         roleId: role.data._id,
+     
         
       });
       await user.save();
@@ -239,11 +240,11 @@ class UserController {
           }
           return res
             .status(StatusCodes.OK)
-            .json("user removed with his comments");
+            .json("Your Account Has Been Deleted Successfully !");
         }
        
       }
-      return res.status(StatusCodes.OK).json("user removed"); //message for user who dont have comments (else)
+      return res.status(StatusCodes.OK).json("user and comments deleted"); //message for user who dont have comments (else)
     } catch (e) {
       console.log(e);
       return res

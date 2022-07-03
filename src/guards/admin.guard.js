@@ -2,7 +2,7 @@ const StatusCodes = require("http-status-codes");
 const userModel = require("../models/user.model");
 
 async function adminGuard(req, res, next) {
-  //console.log("aaaaaaaaaaaaaaaaaa")
+
   try {
     const { authEmail, authId, authRole } = req.infos;
     console.log(authEmail);
@@ -14,7 +14,7 @@ async function adminGuard(req, res, next) {
     if (!userexists) {
       return res.status(StatusCodes.NOT_FOUND).json("user not found");
     }
-    console.log(userexists.roleId._id);
+    
     if (
       authEmail !== userexists.email ||
       authRole !== userexists.roleId._id.toString()

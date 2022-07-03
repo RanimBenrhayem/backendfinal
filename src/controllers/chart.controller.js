@@ -28,7 +28,7 @@ class ChartController {
             gfs.openDownloadStream(mongoose.Types.ObjectId(req.params.id))
                 .on("data" , (chunk) => bufs.push(chunk)).on("end" , ()=> {
                 const fbuf = Buffer.concat(bufs); 
-                result = fbuf.toString();
+                result = fbuf.toString(); //convert to sting first
                 const parsed = Papa.parse(result); //convert result to object
                 if(parsed.errors.length>0) {
                     return  res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({error : parsed.errors}) //error lors du parse
@@ -41,7 +41,7 @@ class ChartController {
                         const elt = element[y].replace(/(\r\n|\n|\r)/gm, "") //nettoyage des données 
                         if(dataMap.get(element[x])) { 
 
-                            dataMap.set(element[x] , dataMap.get(element[x])+ parseFloat(elt )) //si somme
+                            dataMap.set(element[x] , dataMap.get(element[x])+ parseFloat(elt )) //si somme , elemnt [x] cest la clé 
                         }
                         else {
                             dataMap.set(element[x] ,  parseFloat( elt))
@@ -250,8 +250,14 @@ class ChartController {
                 let returnedData = []
                 let labels = []
                 parsed.map((element)=>{
-                    returnedData.push(element[yaxis])
-                    labels.push(element[xaxis])
+                    const xIndex = labels.indexOf(element[xaxis]) ; //index de label
+                    if(xIndex==-1){ //index n'est pas trouvé , nouveau element , stocke dans le tableau 
+                        returnedData.push(element[yaxis])
+                        labels.push(element[xaxis])
+                    }else {
+                        returnedData[xIndex]= returnedData[xIndex]+element[yaxis] //index trouvé donc somme 
+                    }
+
                 })
                 return res.status(StatusCodes.OK).json({xaxis,yaxis ,   returnedData , labels});
             })
@@ -290,8 +296,13 @@ class ChartController {
                 let returnedData = []
                 let labels = []
                 parsed.map((element)=>{
-                    returnedData.push(element[yaxis])
-                    labels.push(element[xaxis])
+                    const xIndex = labels.indexOf(element[xaxis]) ;
+                    if(xIndex==-1){
+                        returnedData.push(element[yaxis])
+                        labels.push(element[xaxis])
+                    }else {
+                        returnedData[xIndex]= returnedData[xIndex]+element[yaxis]
+                    }
                 })
                 return res.status(StatusCodes.OK).json({ data :{xaxis,yaxis ,   returnedData , labels},type:savedDashboard.typeOfDashboard});
             })
@@ -342,9 +353,11 @@ class ChartController {
                 return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json("error in adding alert")
             }
            const dashboardToUpdate = await DashboardModel.findOne({_id:id})
+
             dashboardToUpdate.alertId=addingAlert.data._id;
+
            const finalResult= await dashboardToUpdate.save()
-            return res.status(StatusCodes.OK).json(finalResult)
+            return res.status(StatusCodes.OK).json({finalResult,msg:"saved alert"})
 
         }catch (e) {
             console.log(e)
@@ -420,7 +433,7 @@ class ChartController {
             const dashboardToUpdate = await DashboardModel.findOne({_id:id})
             dashboardToUpdate.alertId=addingAlert.data._id;
             const finalResult= await dashboardToUpdate.save()
-            return res.status(StatusCodes.OK).json(finalResult)
+            return res.status(StatusCodes.OK).json({finalResult,msg:"alert saved"})
 
         }catch (e) {
             console.log(e)
